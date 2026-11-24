@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "server": "tsx server/index.ts",
     "server:dev": "nodemon --watch server -e ts --exec tsx server/index.ts",
+    "test:api": "tsx scripts/test-api.ts",
     "dev:all": "concurrently -n \"API,PWA\" -c \"cyan,magenta\" \"npm run server\" \"npm run dev\""
   },
   "dependencies": {
