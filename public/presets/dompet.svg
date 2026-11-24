@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <rect width="400" height="300" fill="#f8fafc" />
+  <!-- Wallet Body -->
+  <rect x="75" y="70" width="250" height="150" rx="14" fill="#78350f" filter="drop-shadow(0 8px 12px rgba(0,0,0,0.18))" />
+  <path d="M 75 95 L 325 95" stroke="#451a03" stroke-width="3" stroke-dasharray="6,4" />
+  <!-- Flap -->
+  <path d="M 75 70 Q 200 120 325 70 L 325 150 Q 200 200 75 150 Z" fill="#92400e" opacity="0.9" />
+  <!-- Lock Button -->
+  <circle cx="270" cy="145" r="14" fill="#f59e0b" stroke="#78350f" stroke-width="2" />
+  <circle cx="270" cy="145" r="5" fill="#fef3c7" />
+  <!-- Cards poking out -->
+  <rect x="110" y="55" width="80" height="25" rx="4" fill="#0284c7" />
+  <rect x="130" y="45" width="80" height="25" rx="4" fill="#10b981" />
+  <text x="200" y="265" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#475569">Dompet Kulit &amp; Kartu</text>
+</svg>

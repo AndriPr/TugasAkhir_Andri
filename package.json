@@ -1,0 +1,41 @@
+{
+  "name": "lostfind-pwa-campus",
+  "private": true,
+  "version": "1.0.0",
+  "description": "LostFind: Aplikasi Pelaporan dan Pencarian Barang Hilang di Kampus - Tugas Akhir Praktikum PPB oleh Andri Pratama (21120124140134)",
+  "author": "Andri Pratama (21120124140134)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "server": "tsx server/index.ts",
+    "server:dev": "nodemon --watch server -e ts --exec tsx server/index.ts",
+    "dev:all": "concurrently -n \"API,PWA\" -c \"cyan,magenta\" \"npm run server\" \"npm run dev\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.119.2",
+    "axios": "^1.21.1",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "lucide-react": "^1.79.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "vite-plugin-pwa": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.7",
+    "nodemon": "^3.1.14",
+    "oxlint": "^1.90.0",
+    "tsx": "^4.23.15",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.6"
+  }
+}

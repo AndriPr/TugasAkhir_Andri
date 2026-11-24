@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <rect width="400" height="300" fill="#f8fafc" />
+  <!-- Helmet Shell -->
+  <path d="M 120 180 C 100 110 150 50 250 50 C 310 50 330 110 320 180 C 310 210 270 215 220 215 C 170 215 130 205 120 180 Z" fill="#dc2626" filter="drop-shadow(0 10px 15px rgba(0,0,0,0.2))" />
+  <!-- Visor -->
+  <path d="M 180 120 Q 280 110 295 170 C 260 175 220 175 180 165 Z" fill="#0f172a" opacity="0.9" stroke="#94a3b8" stroke-width="2" />
+  <!-- Stripe Accent -->
+  <path d="M 170 55 Q 260 55 300 120" stroke="#facc15" stroke-width="8" fill="none" stroke-linecap="round" />
+  <text x="200" y="265" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#475569">Helm Motor / Aksesoris</text>
+</svg>

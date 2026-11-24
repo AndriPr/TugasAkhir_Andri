@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <rect width="400" height="300" fill="#f8fafc" />
+  <!-- Ring -->
+  <circle cx="140" cy="110" r="45" fill="none" stroke="#f59e0b" stroke-width="14" />
+  <circle cx="140" cy="110" r="32" fill="#f8fafc" />
+  <!-- Key 1 (Golden) -->
+  <path d="M 175 125 L 290 195 L 305 185 L 300 175 L 285 185 L 275 165 L 260 175 Z" fill="#f59e0b" />
+  <circle cx="140" cy="110" r="14" fill="#fbbf24" />
+  <!-- Key 2 (Silver) -->
+  <path d="M 160 135 L 240 225 L 255 215 L 245 200 L 235 210 Z" fill="#94a3b8" />
+  <!-- Keychain tag -->
+  <rect x="75" y="145" width="55" height="90" rx="8" fill="#3b82f6" />
+  <circle cx="102" cy="165" r="5" fill="#f8fafc" />
+  <rect x="87" y="185" width="30" height="6" rx="2" fill="#ffffff" />
+  <rect x="87" y="200" width="20" height="4" rx="2" fill="#bfdbfe" />
+  <text x="200" y="270" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#475569">Gantungan Kunci Motor / Kos</text>
+</svg>

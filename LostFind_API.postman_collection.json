@@ -1,0 +1,229 @@
+{
+  "info": {
+    "name": "LostFind Campus API - Andri Pratama (21120124140134)",
+    "_postman_id": "lostfind-campus-api-collection",
+    "description": "Koleksi API Web Service untuk aplikasi LostFind (Pelaporan dan Pencarian Barang Hilang di Kampus) sesuai Modul 1 Praktikum PPB.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Items",
+      "item": [
+        {
+          "name": "1. GET All Items (Semua Barang)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "items"]
+            }
+          }
+        },
+        {
+          "name": "2. GET Lost Items (Barang Hilang)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/items?type=lost",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "items"],
+              "query": [{ "key": "type", "value": "lost" }]
+            }
+          }
+        },
+        {
+          "name": "3. GET Found Items (Barang Ditemukan)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/items?type=found",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "items"],
+              "query": [{ "key": "type", "value": "found" }]
+            }
+          }
+        },
+        {
+          "name": "4. POST Create Item (Buat Laporan Baru)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Kalkulator Casio FX-991EX Hitam\",\n  \"type\": \"lost\",\n  \"category\": \"Elektronik\",\n  \"location\": \"Lab Komputer Dasar Gedung C\",\n  \"date\": \"2026-11-24\",\n  \"time\": \"13:00 WIB\",\n  \"description\": \"Kalkulator saintifik tertinggal di sebelah PC nomor 8. Ada nama bertuliskan Andri di penutupnya.\",\n  \"imageUrl\": \"/presets/laptop.svg\",\n  \"contactName\": \"Andri Pratama\",\n  \"contactPhone\": \"081234567890\",\n  \"userId\": \"user-andri-01\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "items"]
+            }
+          }
+        },
+        {
+          "name": "5. GET Item by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/items/item-101",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "items", "item-101"]
+            }
+          }
+        },
+        {
+          "name": "6. PUT Update Item (Ubah Status Barang)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"resolved\",\n  \"description\": \"Barang sudah berhasil dikembalikan kepada pemiliknya.\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/items/item-101",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "items", "item-101"]
+            }
+          }
+        },
+        {
+          "name": "7. DELETE Item",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/items/item-101",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "items", "item-101"]
+            }
+          }
+        },
+        {
+          "name": "8. GET Item Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/items/stats",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "items", "stats"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "1. GET All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/categories",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "categories"]
+            }
+          }
+        },
+        {
+          "name": "2. POST Create Category",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Perhiasan & Jam\",\n  \"description\": \"Cincin, gelang, kalung, jam tangan mewah\",\n  \"iconName\": \"Watch\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/categories",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "categories"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Claims",
+      "item": [
+        {
+          "name": "1. GET All Claims",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/claims",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "claims"]
+            }
+          }
+        },
+        {
+          "name": "2. POST Submit Claim",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": \"item-104\",\n  \"itemTitle\": \"Dompet Kulit Coklat Baellerry\",\n  \"itemType\": \"found\",\n  \"itemImageUrl\": \"/presets/dompet.svg\",\n  \"claimantName\": \"Andri Pratama\",\n  \"claimantNim\": \"21120124140134\",\n  \"claimantPhone\": \"081234567890\",\n  \"proofDescription\": \"Di dalam dompet ada kartu member gramedia atas nama Andri dan uang pecahan 50 ribu 2 lembar.\",\n  \"userId\": \"user-andri-01\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/claims",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "claims"]
+            }
+          }
+        },
+        {
+          "name": "3. PUT Update Claim Status",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"verified\",\n  \"verificationNotes\": \"Bukti kepemilikan valid. Telah diserahkan di Pos Satpam.\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/claims/claim-201",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "claims", "claim-201"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

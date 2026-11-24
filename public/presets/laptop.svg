@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <rect width="400" height="300" fill="#f8fafc" />
+  <!-- Laptop Screen -->
+  <rect x="80" y="45" width="240" height="150" rx="10" fill="#1e293b" stroke="#475569" stroke-width="3" />
+  <rect x="92" y="57" width="216" height="126" rx="4" fill="#0284c7" opacity="0.8" />
+  <!-- Screen Glow/Window -->
+  <rect x="110" y="75" width="180" height="90" rx="6" fill="#0f172a" />
+  <circle cx="125" cy="88" r="4" fill="#ef4444" />
+  <circle cx="138" cy="88" r="4" fill="#eab308" />
+  <circle cx="151" cy="88" r="4" fill="#22c55e" />
+  <rect x="125" y="105" width="90" height="6" rx="2" fill="#38bdf8" />
+  <rect x="125" y="120" width="130" height="6" rx="2" fill="#64748b" />
+  <rect x="125" y="135" width="110" height="6" rx="2" fill="#64748b" />
+  <!-- Laptop Base -->
+  <path d="M 50 205 L 350 205 L 335 220 L 65 220 Z" fill="#94a3b8" />
+  <rect x="165" y="206" width="70" height="5" rx="2.5" fill="#64748b" />
+  <text x="200" y="265" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#475569">Laptop / Perangkat Elektronik</text>
+</svg>
