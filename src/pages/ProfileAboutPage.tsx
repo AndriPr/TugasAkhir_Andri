@@ -13,9 +13,11 @@ import {
   Clock,
   Layers,
   ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
 import { getUserProfile, saveUserProfile } from '../services/userService';
 import { UserProfile } from '../types';
+import { InteractiveTiltCard, RevealSection } from '../components/common/MotionPrimitives';
 
 interface ProfileAboutPageProps {
   onReplaySplash: () => void;
@@ -53,40 +55,48 @@ export const ProfileAboutPage: React.FC<ProfileAboutPageProps> = ({ onReplaySpla
   };
 
   return (
-    <div className="page-container">
-      {/* Masthead */}
-      <section className="page-masthead">
-        <div className="page-masthead__content">
-          <span className="page-subtitle-badge">Identitas Praktikan &amp; Informasi Sistem</span>
-          <h2 className="page-title">Profil &amp; Tentang LostFind</h2>
-          <p className="page-lede">
-            Aplikasi PWA Tugas Akhir Praktikum Pengembangan Perangkat Bergerak (PPB) Universitas Diponegoro.
-          </p>
+    <div className="page-container page-enter">
+      {/* Bright Sky Header */}
+      <div className="subpage-hero subpage-hero--lost">
+        <div className="hero-decor" aria-hidden="true">
+          <div className="hero-cloud hero-cloud--1" />
+          <div className="hero-cloud hero-cloud--2" />
         </div>
-      </section>
+        <div className="subpage-hero__inner">
+          <div>
+            <span className="hero-pill-badge">
+              <Sparkles size={13} /> Identitas Praktikan &amp; Sistem PWA
+            </span>
+            <h2 className="subpage-hero__title">Profil &amp; Tentang LostFind</h2>
+            <p className="subpage-hero__sub">
+              Tugas Akhir Praktikum Pengembangan Perangkat Bergerak (PPB) • TypeScript &amp; PWA.
+            </p>
+          </div>
+        </div>
+      </div>
 
-      {/* Nav Pills Section */}
-      <div className="profile-subnav">
+      {/* Tripco Dark-Pill Sub-nav */}
+      <div className="explore-pills-row">
         <button
           type="button"
-          className={`pill ${activeSection === 'profile' ? 'pill--active' : ''}`}
+          className={`explore-pill ${activeSection === 'profile' ? 'explore-pill--active' : ''}`}
           onClick={() => setActiveSection('profile')}
         >
           <User size={14} /> Profil Praktikan
         </button>
         <button
           type="button"
-          className={`pill ${activeSection === 'about' ? 'pill--active' : ''}`}
+          className={`explore-pill ${activeSection === 'about' ? 'explore-pill--active' : ''}`}
           onClick={() => setActiveSection('about')}
         >
           <Info size={14} /> Tentang LostFind
         </button>
         <button
           type="button"
-          className={`pill ${activeSection === 'posko' ? 'pill--active' : ''}`}
+          className={`explore-pill ${activeSection === 'posko' ? 'explore-pill--active' : ''}`}
           onClick={() => setActiveSection('posko')}
         >
-          <PhoneCall size={14} /> Posko Keamanan Kampus
+          <PhoneCall size={14} /> Posko Keamanan
         </button>
       </div>
 
@@ -100,8 +110,7 @@ export const ProfileAboutPage: React.FC<ProfileAboutPageProps> = ({ onReplaySpla
       {/* SECTION 1: PROFIL PRAKTIKAN */}
       {activeSection === 'profile' && (
         <div className="profile-section-wrap">
-          {/* Student Card */}
-          <div className="student-profile-card">
+          <InteractiveTiltCard className="student-profile-card">
             <div className="student-card-glow" />
             <div className="student-card-content">
               <div className="student-avatar-wrap">
@@ -123,9 +132,8 @@ export const ProfileAboutPage: React.FC<ProfileAboutPageProps> = ({ onReplaySpla
                 </p>
               </div>
             </div>
-          </div>
+          </InteractiveTiltCard>
 
-          {/* Form Edit Profil */}
           <form onSubmit={handleSaveProfile} className="profile-form-card">
             <h4 className="form-card-title">Pengaturan Identitas Akun</h4>
 
@@ -178,13 +186,12 @@ export const ProfileAboutPage: React.FC<ProfileAboutPageProps> = ({ onReplaySpla
             </div>
 
             <div className="form-actions-bar">
-              <button type="submit" className="btn btn--primary">
+              <button type="submit" className="btn btn--cyan-pill">
                 <Save size={16} /> Simpan Perubahan Profil
               </button>
             </div>
           </form>
 
-          {/* System Control Card */}
           <div className="system-control-card">
             <h4 className="form-card-title">Pintasan Sistem &amp; PWA</h4>
             <div className="system-buttons-row">
@@ -192,7 +199,6 @@ export const ProfileAboutPage: React.FC<ProfileAboutPageProps> = ({ onReplaySpla
                 type="button"
                 className="btn btn--outline btn--sm"
                 onClick={onReplaySplash}
-                title="Putar ulang intro splash screen"
               >
                 <Play size={14} /> Putar Ulang Splash Screen
               </button>
@@ -200,7 +206,6 @@ export const ProfileAboutPage: React.FC<ProfileAboutPageProps> = ({ onReplaySpla
                 type="button"
                 className="btn btn--danger-ghost btn--sm"
                 onClick={handleClearCache}
-                title="Reset cache lokal aplikasi"
               >
                 <RefreshCw size={14} /> Reset Cache Lokal
               </button>
@@ -211,7 +216,7 @@ export const ProfileAboutPage: React.FC<ProfileAboutPageProps> = ({ onReplaySpla
 
       {/* SECTION 2: TENTANG LOSTFIND */}
       {activeSection === 'about' && (
-        <div className="about-section-wrap">
+        <RevealSection className="about-section-wrap">
           <div className="about-feature-box">
             <div className="about-feature-head">
               <div className="feature-icon-badge">
@@ -219,7 +224,9 @@ export const ProfileAboutPage: React.FC<ProfileAboutPageProps> = ({ onReplaySpla
               </div>
               <div>
                 <h3>Tentang LostFind Kampus</h3>
-                <span className="about-sub">Solusi Terpadu Penanganan Barang Hilang &amp; Temuan</span>
+                <span className="about-sub">
+                  Solusi Terpadu Penanganan Barang Hilang &amp; Temuan
+                </span>
               </div>
             </div>
             <p className="about-text">
@@ -258,12 +265,12 @@ export const ProfileAboutPage: React.FC<ProfileAboutPageProps> = ({ onReplaySpla
               </p>
             </div>
           </div>
-        </div>
+        </RevealSection>
       )}
 
       {/* SECTION 3: POSKO KEAMANAN KAMPUS */}
       {activeSection === 'posko' && (
-        <div className="posko-section-wrap">
+        <RevealSection className="posko-section-wrap">
           <div className="posko-card">
             <div className="posko-head">
               <MapPin size={22} className="text-primary" />
@@ -303,7 +310,7 @@ export const ProfileAboutPage: React.FC<ProfileAboutPageProps> = ({ onReplaySpla
               </div>
             </div>
           </div>
-        </div>
+        </RevealSection>
       )}
     </div>
   );

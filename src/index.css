@@ -1,25 +1,37 @@
 :root {
-  --primary: #0284c7;
-  --primary-hover: #0369a1;
-  --primary-light: #e0f2fe;
-  --accent-lost: #ef4444;
-  --accent-lost-bg: #fee2e2;
-  --accent-found: #16a34a;
-  --accent-found-bg: #dcfce7;
-  --accent-claim: #f59e0b;
-  --accent-claim-bg: #fef3c7;
+  /* Tripco-Inspired Airy Ocean & Bright Cyan Palette */
+  --cyan-400: #22d3ee;
+  --cyan-500: #00a6c0;
+  --cyan-600: #0891b2;
+  --sky-400: #38bdf8;
+  --sky-500: #0ea5e9;
+  --mint-500: #10b981;
+  --mint-600: #059669;
 
-  --bg-main: #f8fafc;
+  --primary: #00a6c0;
+  --primary-hover: #0891b2;
+  --primary-light: #e0f7fa;
+  --dark-ink: #1e293b;
+
+  --accent-lost: #ef4444;
+  --accent-lost-bg: #fef2f2;
+  --accent-found: #10b981;
+  --accent-found-bg: #ecfdf5;
+  --accent-claim: #f59e0b;
+  --accent-claim-bg: #fffbeb;
+
+  --bg-main: #ffffff;
+  --bg-soft: #f8fbfd;
   --bg-card: #ffffff;
   --text-main: #0f172a;
   --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --border-focus: #38bdf8;
+  --border-color: #e8eef3;
+  --border-focus: #00a6c0;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 4px 10px -4px rgba(15, 23, 42, 0.03);
+  --shadow-lg: 0 20px 45px -10px rgba(0, 166, 192, 0.14);
+  --shadow-xl: 0 25px 50px -12px rgba(15, 23, 42, 0.18);
 
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color-scheme: light;
@@ -31,6 +43,10 @@
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -38,7 +54,7 @@ body {
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
+  line-height: 1.55;
   overflow-x: hidden;
 }
 
@@ -61,4 +77,12 @@ a {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

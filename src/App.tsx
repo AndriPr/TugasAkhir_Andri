@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ActiveTab, LostFindItem, ItemClaim } from './types';
 import { Header } from './components/common/Header';
 import { BottomNav } from './components/common/BottomNav';
+import { Footer } from './components/common/Footer';
 import { PWABadge } from './components/common/PWABadge';
 import { SplashScreen } from './components/common/SplashScreen';
 import { ItemDetailModal } from './components/items/ItemDetailModal';
@@ -24,7 +25,6 @@ export function App() {
   const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
   const [myCount, setMyCount] = useState<number>(0);
 
-  // Monitor network online/offline state
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
     const handleOffline = () => setIsOffline(true);
@@ -38,7 +38,6 @@ export function App() {
     };
   }, []);
 
-  // Update count of user's active items
   const refreshUserCounts = useCallback(async () => {
     try {
       const user = getUserProfile();
@@ -90,21 +89,17 @@ export function App() {
 
   return (
     <div className="app-shell">
-      {/* Splash Screen on First Load / Replay */}
       {showSplash && (
-        <SplashScreen onFinish={() => setShowSplash(false)} duration={3200} />
+        <SplashScreen onFinish={() => setShowSplash(false)} duration={2800} />
       )}
 
-      {/* Top Application Header */}
       <Header
         activeTab={activeTab}
         onTabChange={handleTabChange}
         isOffline={isOffline}
       />
 
-      {/* Main Content Area */}
-      <main className="app-main">
-        {/* Halaman 1: Barang Hilang */}
+      <main className="app-main" key={activeTab}>
         {activeTab === 'lost' && (
           <LostItemsPage
             onSelectItem={(item) => setSelectedItem(item)}
@@ -112,7 +107,6 @@ export function App() {
           />
         )}
 
-        {/* Halaman 2: Barang Ditemukan */}
         {activeTab === 'found' && (
           <FoundItemsPage
             onSelectItem={(item) => setSelectedItem(item)}
@@ -120,7 +114,6 @@ export function App() {
           />
         )}
 
-        {/* Halaman 3: Buat Laporan */}
         {activeTab === 'report' && (
           <ReportPage
             onSuccess={handleItemCreated}
@@ -128,7 +121,6 @@ export function App() {
           />
         )}
 
-        {/* Halaman 4: Aktivitas & Klaim Saya */}
         {activeTab === 'activity' && (
           <MyActivityPage
             onSelectItem={(item) => setSelectedItem(item)}
@@ -138,13 +130,13 @@ export function App() {
           />
         )}
 
-        {/* Halaman 5: Profil & About */}
         {activeTab === 'profile' && (
           <ProfileAboutPage onReplaySplash={() => setShowSplash(true)} />
         )}
+
+        <Footer onTabChange={handleTabChange} />
       </main>
 
-      {/* Item Detail Modal (Requirement 4: Klik item memunculkan detail) */}
       <ItemDetailModal
         item={selectedItem}
         onClose={() => setSelectedItem(null)}
@@ -155,17 +147,14 @@ export function App() {
         }}
       />
 
-      {/* Claim Detail Modal */}
       <ClaimDetailModal
         claim={selectedClaim}
         onClose={() => setSelectedClaim(null)}
         onUpdateStatus={handleUpdateClaimStatus}
       />
 
-      {/* PWA Install Banner & Offline Toast */}
       <PWABadge />
 
-      {/* Bottom Navigation Bar (Requirement 2) */}
       <BottomNav
         activeTab={activeTab}
         onTabChange={handleTabChange}

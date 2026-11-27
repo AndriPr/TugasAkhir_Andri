@@ -5,9 +5,7 @@ import {
   AlertCircle,
   Loader,
   Save,
-  RotateCcw,
   Sparkles,
-  Camera,
   MapPin,
   Calendar,
   Clock,
@@ -15,10 +13,19 @@ import {
   User,
   ShieldCheck,
   Award,
+  Search,
+  PackageCheck,
 } from 'lucide-react';
 import { ItemType, LostFindItem } from '../types';
 import { INITIAL_CATEGORIES, CAMPUS_LOCATIONS } from '../utils/initialData';
-import { saveDraft, loadDraft, deleteDraft, hasDraft, getDraftTimestamp, formatDraftTime } from '../utils/draftStorage';
+import {
+  saveDraft,
+  loadDraft,
+  deleteDraft,
+  hasDraft,
+  getDraftTimestamp,
+  formatDraftTime,
+} from '../utils/draftStorage';
 import { itemService } from '../services/itemService';
 import { getUserProfile } from '../services/userService';
 import { ConfirmModal } from '../components/common/ConfirmModal';
@@ -31,7 +38,6 @@ interface ReportPageProps {
 export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) => {
   const userProfile = getUserProfile();
 
-  // Form State
   const [reportType, setReportType] = useState<ItemType>('lost');
   const [title, setTitle] = useState<string>('');
   const [category, setCategory] = useState<string>('Elektronik');
@@ -50,23 +56,49 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [successToast, setSuccessToast] = useState<string>('');
 
-  // Draft Management State
   const [showDraftModal, setShowDraftModal] = useState<boolean>(() => hasDraft('report'));
-  const [draftTimestamp, setDraftTimestamp] = useState<string | null>(() => getDraftTimestamp('report'));
+  const [draftTimestamp, setDraftTimestamp] = useState<string | null>(() =>
+    getDraftTimestamp('report')
+  );
 
-  // Preset options for quick imagery
   const PRESET_IMAGES = [
-    { label: 'Laptop / Elektronik', url: '/presets/laptop.svg' },
-    { label: 'KTM / Dokumen', url: '/presets/ktm.svg' },
-    { label: 'Kunci Motor', url: '/presets/kunci.svg' },
+    { label: 'Laptop', url: '/presets/laptop.svg' },
+    { label: 'KTM / Kartu', url: '/presets/ktm.svg' },
+    { label: 'Kunci', url: '/presets/kunci.svg' },
     { label: 'Dompet', url: '/presets/dompet.svg' },
-    { label: 'Botol Minum', url: '/presets/botol.svg' },
-    { label: 'Helm Motor', url: '/presets/helm.svg' },
+    { label: 'Tumbler', url: '/presets/botol.svg' },
+    { label: 'Helm', url: '/presets/helm.svg' },
   ];
 
-  // Auto-Save Draft to LocalStorage
-  const handleSaveDraft = useCallback((showNotification: boolean = true) => {
-    const draftPayload = {
+  const handleSaveDraft = useCallback(
+    (showNotification: boolean = true) => {
+      const draftPayload = {
+        reportType,
+        title,
+        category,
+        location,
+        customLocation,
+        date,
+        time,
+        description,
+        securedAt,
+        rewardInfo,
+        contactName,
+        contactPhone,
+        imageUrl,
+      };
+
+      const saved = saveDraft(draftPayload, 'report');
+      if (saved) {
+        const ts = getDraftTimestamp('report');
+        setDraftTimestamp(ts);
+        if (showNotification) {
+          setSuccessToast(`Draf formulir tersimpan (${formatDraftTime(ts)})`);
+          setTimeout(() => setSuccessToast(''), 3000);
+        }
+      }
+    },
+    [
       reportType,
       title,
       category,
@@ -80,34 +112,9 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
       contactName,
       contactPhone,
       imageUrl,
-    };
+    ]
+  );
 
-    const saved = saveDraft(draftPayload, 'report');
-    if (saved) {
-      const ts = getDraftTimestamp('report');
-      setDraftTimestamp(ts);
-      if (showNotification) {
-        setSuccessToast(`Draf formulir tersimpan (${formatDraftTime(ts)})`);
-        setTimeout(() => setSuccessToast(''), 3000);
-      }
-    }
-  }, [
-    reportType,
-    title,
-    category,
-    location,
-    customLocation,
-    date,
-    time,
-    description,
-    securedAt,
-    rewardInfo,
-    contactName,
-    contactPhone,
-    imageUrl,
-  ]);
-
-  // Interval auto-save setiap 25 detik
   useEffect(() => {
     const timer = setInterval(() => {
       if (title.trim() || description.trim()) {
@@ -117,7 +124,6 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
     return () => clearInterval(timer);
   }, [handleSaveDraft, title, description]);
 
-  // Restore Draft
   const handleLoadDraft = () => {
     const draft = loadDraft('report');
     if (draft) {
@@ -147,7 +153,6 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
     setDraftTimestamp(null);
   };
 
-  // Handle Image File Upload (Convert to Base64)
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -166,7 +171,6 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
     reader.readAsDataURL(file);
   };
 
-  // Submit Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
@@ -198,7 +202,9 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
       location: finalLocation,
       date,
       time,
-      description: description.trim() || `Laporan ${reportType === 'lost' ? 'kehilangan' : 'penemuan'} ${title}.`,
+      description:
+        description.trim() ||
+        `Laporan ${reportType === 'lost' ? 'kehilangan' : 'penemuan'} ${title}.`,
       imageUrl: imageUrl || '/presets/laptop.svg',
       contactName: contactName.trim() || userProfile.name,
       contactPhone: contactPhone.trim(),
@@ -225,26 +231,31 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
   };
 
   return (
-    <div className="page-container form-page">
-      {/* Header Form */}
-      <div className="form-page-head">
-        <div>
-          <span className="page-subtitle-badge">
-            <Sparkles size={13} /> Formulir Pelaporan Kampus
-          </span>
-          <h2 className="page-title">Buat Laporan Baru</h2>
-          <p className="page-lede">
-            Laporkan barang yang hilang agar dapat dicari bersama, atau publikasikan barang yang Anda temukan untuk dikembalikan ke pemilik sah.
-          </p>
+    <div className="page-container page-enter">
+      {/* Bright Sky Header Banner */}
+      <div className={`subpage-hero subpage-hero--${reportType}`}>
+        <div className="hero-decor" aria-hidden="true">
+          <div className="hero-cloud hero-cloud--1" />
+          <div className="hero-cloud hero-cloud--2" />
         </div>
-        <div className="form-head-actions">
+        <div className="subpage-hero__inner">
+          <div>
+            <span className="hero-pill-badge">
+              <Sparkles size={13} /> Auto-Save Draft Aktif
+            </span>
+            <h2 className="subpage-hero__title">Buat Laporan Kampus</h2>
+            <p className="subpage-hero__sub">
+              Publikasikan informasi barang hilang atau barang temuan agar segera menemukan pemiliknya.
+            </p>
+          </div>
           <button
             type="button"
-            className="btn btn--outline btn--sm"
+            className="btn-glass-white"
             onClick={() => handleSaveDraft(true)}
             title="Simpan draf secara manual"
           >
-            <Save size={14} /> Simpan Draf
+            <Save size={15} />
+            <span>Simpan Draf</span>
           </button>
         </div>
       </div>
@@ -264,44 +275,45 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
         </div>
       )}
 
-      {/* Type Selector (Lost vs Found) */}
+      {/* Animated Type Selector Cards */}
       <div className="report-type-toggle">
         <button
           type="button"
           className={`toggle-btn ${reportType === 'lost' ? 'toggle-btn--active-lost' : ''}`}
-          onClick={() => {
-            setReportType('lost');
-            if (category === 'Elektronik') setImageUrl('/presets/laptop.svg');
-          }}
+          onClick={() => setReportType('lost')}
         >
-          <div className="toggle-btn__indicator" />
+          <div className="toggle-btn__icon-circle toggle-btn__icon-circle--lost">
+            <Search size={18} />
+          </div>
           <div className="toggle-btn__text">
             <strong>Saya Kehilangan Barang</strong>
-            <span>Barang saya tercecer/hilang di lingkungan kampus</span>
+            <span>Barang saya tercecer di lingkungan kampus</span>
           </div>
         </button>
 
         <button
           type="button"
           className={`toggle-btn ${reportType === 'found' ? 'toggle-btn--active-found' : ''}`}
-          onClick={() => {
-            setReportType('found');
-            if (category === 'Elektronik') setImageUrl('/presets/laptop.svg');
-          }}
+          onClick={() => setReportType('found')}
         >
-          <div className="toggle-btn__indicator" />
+          <div className="toggle-btn__icon-circle toggle-btn__icon-circle--found">
+            <PackageCheck size={18} />
+          </div>
           <div className="toggle-btn__text">
             <strong>Saya Menemukan Barang</strong>
-            <span>Saya menemukan barang tak bertuan di kampus</span>
+            <span>Saya mengamankan barang temuan di kampus</span>
           </div>
         </button>
       </div>
 
-      {/* Form Content */}
+      {/* Main Form Card */}
       <form onSubmit={handleSubmit} className="report-form-card">
-        {/* Section 1: Informasi Barang */}
+        {/* Section 1 */}
         <div className="form-section">
-          <h3 className="form-section-title">1. Identitas &amp; Foto Barang</h3>
+          <div className="form-section-head">
+            <span className="step-chip step-chip--cyan">01</span>
+            <h3 className="form-section-title">Identitas &amp; Foto Barang</h3>
+          </div>
 
           <div className="form-group">
             <label className="form-label">Nama / Judul Barang *</label>
@@ -309,7 +321,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Contoh: KTM Undip Teknik, Laptop ASUS Vivobook, Kunci Vario..."
+              placeholder="Contoh: KTM Undip Teknik, Laptop ASUS Vivobook, Kunci Vario…"
               className="form-input"
               required
             />
@@ -322,7 +334,6 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
                 value={category}
                 onChange={(e) => {
                   setCategory(e.target.value);
-                  // Auto-suggest preset icon
                   if (e.target.value === 'Dokumen & Kartu') setImageUrl('/presets/ktm.svg');
                   else if (e.target.value === 'Elektronik') setImageUrl('/presets/laptop.svg');
                   else if (e.target.value === 'Kunci & Aksesoris') setImageUrl('/presets/kunci.svg');
@@ -344,7 +355,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
               <div className="image-preview-bar">
                 <img src={imageUrl} alt="Preview" className="img-thumb-preview" />
                 <label htmlFor="file-image-input" className="btn btn--outline btn--sm">
-                  <Upload size={14} /> Ganti Foto
+                  <Upload size={14} /> Unggah Foto
                   <input
                     id="file-image-input"
                     type="file"
@@ -357,27 +368,33 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
             </div>
           </div>
 
-          {/* Preset Buttons for Quick Choice */}
+          {/* Visual Preset Cards */}
           <div className="preset-choice-wrap">
-            <span className="preset-choice-label">Atau pilih ikon cepat:</span>
-            <div className="preset-pills">
+            <span className="preset-choice-label">Atau pilih ilustrasi cepat:</span>
+            <div className="preset-visual-grid">
               {PRESET_IMAGES.map((p) => (
                 <button
                   key={p.url}
                   type="button"
-                  className={`preset-pill ${imageUrl === p.url ? 'preset-pill--active' : ''}`}
+                  className={`preset-visual-card ${
+                    imageUrl === p.url ? 'preset-visual-card--active' : ''
+                  }`}
                   onClick={() => setImageUrl(p.url)}
                 >
-                  {p.label}
+                  <img src={p.url} alt={p.label} />
+                  <span>{p.label}</span>
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Section 2: Waktu & Lokasi */}
+        {/* Section 2 */}
         <div className="form-section">
-          <h3 className="form-section-title">2. Lokasi &amp; Waktu Kejadian</h3>
+          <div className="form-section-head">
+            <span className="step-chip step-chip--sky">02</span>
+            <h3 className="form-section-title">Lokasi &amp; Waktu Kejadian</h3>
+          </div>
 
           <div className="form-row">
             <div className="form-group">
@@ -405,7 +422,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
                   type="text"
                   value={customLocation}
                   onChange={(e) => setCustomLocation(e.target.value)}
-                  placeholder="Misal: Gazebo Depan Dekanat, Musholla Lt. 1..."
+                  placeholder="Misal: Gazebo Depan Dekanat, Musholla Lt. 1…"
                   className="form-input"
                   required
                 />
@@ -435,13 +452,12 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
                 type="text"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                placeholder="Contoh: 14:30 WIB atau Sekitar Dzuhur"
+                placeholder="Contoh: 14:30 WIB"
                 className="form-input"
               />
             </div>
           </div>
 
-          {/* Khusus Laporan Penemuan: Lokasi Diamankan */}
           {reportType === 'found' && (
             <div className="form-group">
               <label className="form-label">
@@ -456,22 +472,21 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
                 required
               />
               <span className="form-hint">
-                Tuliskan tempat barang disimpan agar pemilik yang mengklaim tahu harus mengambil ke mana.
+                Tuliskan tempat barang disimpan agar pemilik tahu lokasi pengambilan.
               </span>
             </div>
           )}
 
-          {/* Khusus Laporan Kehilangan: Hadiah/Imbalan Opsional */}
           {reportType === 'lost' && (
             <div className="form-group">
               <label className="form-label">
-                <Award size={14} /> Tanda Terima Kasih / Apresiasi (Opsional)
+                <Award size={14} /> Apresiasi / Tanda Terima Kasih (Opsional)
               </label>
               <input
                 type="text"
                 value={rewardInfo}
                 onChange={(e) => setRewardInfo(e.target.value)}
-                placeholder="Contoh: Traktir kopi & donat, uang terima kasih Rp 100.000..."
+                placeholder="Contoh: Traktir kopi, uang terima kasih Rp 100.000…"
                 className="form-input"
               />
             </div>
@@ -483,15 +498,18 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Jelaskan warna, tanda khusus, goresan, stiker, isi di dalamnya, atau kronologi singkat..."
+              placeholder="Jelaskan warna, tanda khusus, goresan, stiker, atau kronologi singkat…"
               className="form-textarea"
             />
           </div>
         </div>
 
-        {/* Section 3: Kontak Pelapor */}
+        {/* Section 3 */}
         <div className="form-section">
-          <h3 className="form-section-title">3. Informasi Kontak Pelapor</h3>
+          <div className="form-section-head">
+            <span className="step-chip step-chip--mint">03</span>
+            <h3 className="form-section-title">Informasi Kontak Pelapor</h3>
+          </div>
           <div className="form-row">
             <div className="form-group">
               <label className="form-label">
@@ -534,12 +552,12 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
           </button>
           <button
             type="submit"
-            className="btn btn--primary"
+            className="btn btn--cyan-pill"
             disabled={submitting}
           >
             {submitting ? (
               <>
-                <Loader size={18} className="spin" /> Mempublikasikan Laporan…
+                <Loader size={18} className="spin" /> Mempublikasikan…
               </>
             ) : (
               'Kirim & Terbitkan Laporan'
@@ -548,7 +566,6 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
         </div>
       </form>
 
-      {/* Confirm Load Draft Dialog */}
       <ConfirmModal
         open={showDraftModal}
         title="Lanjutkan Draf Laporan Sebelumnya?"

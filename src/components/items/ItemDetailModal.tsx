@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   MapPin,
   Calendar,
-  Clock,
   User,
   Phone,
   MessageCircle,
-  ShieldAlert,
   ShieldCheck,
   Award,
   CheckCircle,
   Send,
   Loader,
   Trash2,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import { LostFindItem } from '../../types';
 import { formatDate, getCategoryColor, getStatusBadge, formatWhatsAppUrl } from '../../utils/helpers';
@@ -35,14 +35,9 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
   onDeleteItem,
   onClaimSubmitted,
 }) => {
-  if (!item) return null;
-
   const userProfile = getUserProfile();
-  const isOwner = item.userId === userProfile.userId;
-  const catColor = getCategoryColor(item.category);
-  const statusBadge = getStatusBadge(item.status);
 
-  // Klaim Form State
+  // Klaim Form State (placed before early return to obey React Rules of Hooks)
   const [showClaimForm, setShowClaimForm] = useState<boolean>(false);
   const [claimantName, setClaimantName] = useState<string>(userProfile.name);
   const [claimantNim, setClaimantNim] = useState<string>(userProfile.nim);
@@ -51,6 +46,22 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
   const [submittingClaim, setSubmittingClaim] = useState<boolean>(false);
   const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
   const [claimError, setClaimError] = useState<string>('');
+  const [isZoomed, setIsZoomed] = useState<boolean>(false);
+
+  // Reset modal local state when item changes
+  useEffect(() => {
+    setShowClaimForm(false);
+    setClaimSuccess(false);
+    setClaimError('');
+    setProofDescription('');
+    setIsZoomed(false);
+  }, [item?.id]);
+
+  if (!item) return null;
+
+  const isOwner = item.userId === userProfile.userId;
+  const catColor = getCategoryColor(item.category);
+  const statusBadge = getStatusBadge(item.status);
 
   const handleWhatsApp = () => {
     const url = formatWhatsAppUrl(item.contactPhone, item.title, item.type);
@@ -127,9 +138,17 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
 
         {/* Scrollable Body */}
         <div className="detail-modal-body">
-          {/* Main Visual */}
-          <div className="detail-media-wrap">
+          {/* Main Visual with Interactive Zoom */}
+          <div
+            className={`detail-media-wrap ${isZoomed ? 'detail-media-wrap--zoomed' : ''}`}
+            onClick={() => setIsZoomed((z) => !z)}
+            title={isZoomed ? 'Perkecil gambar' : 'Perbesar gambar'}
+          >
             <img src={item.imageUrl} alt={item.title} className="detail-hero-img" />
+            <span className="detail-zoom-pill">
+              {isZoomed ? <ZoomOut size={14} /> : <ZoomIn size={14} />}
+              <span>{isZoomed ? 'Perkecil' : 'Perbesar'}</span>
+            </span>
           </div>
 
           {/* Title & Badges */}
