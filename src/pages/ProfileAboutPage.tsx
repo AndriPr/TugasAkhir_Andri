@@ -14,8 +14,10 @@ import {
   Layers,
   ShieldCheck,
   Sparkles,
+  Database,
 } from 'lucide-react';
 import { getUserProfile, saveUserProfile } from '../services/userService';
+import { apiClient } from '../config/api';
 import { UserProfile } from '../types';
 import { InteractiveTiltCard, RevealSection } from '../components/common/MotionPrimitives';
 
@@ -30,6 +32,11 @@ export const ProfileAboutPage: React.FC<ProfileAboutPageProps> = ({ onReplaySpla
   const [phone, setPhone] = useState<string>(profile.phone);
   const [email, setEmail] = useState<string>(profile.email);
   const [feedback, setFeedback] = useState<string>('');
+  const [dbCheckStatus, setDbCheckStatus] = useState<{
+    loading: boolean;
+    message: string;
+    ok?: boolean;
+  }>({ loading: false, message: '' });
 
   const [activeSection, setActiveSection] = useState<'profile' | 'about' | 'posko'>('profile');
 
@@ -51,6 +58,33 @@ export const ProfileAboutPage: React.FC<ProfileAboutPageProps> = ({ onReplaySpla
       localStorage.removeItem('lostfind_local_items');
       localStorage.removeItem('lostfind_local_claims');
       window.location.reload();
+    }
+  };
+
+  const handleCheckDatabaseConnection = async () => {
+    setDbCheckStatus({ loading: true, message: 'Memeriksa koneksi API & Supabase…' });
+    try {
+      const res: any = await apiClient.get('/health');
+      const db = res?.database;
+      if (db?.connected) {
+        setDbCheckStatus({
+          loading: false,
+          ok: true,
+          message: `Terhubung ke Supabase (${db.detectedUrlEnv || 'URL'} & ${db.detectedKeyEnv || 'KEY'}) di mode ${res?.environment || 'server'}.`,
+        });
+      } else {
+        setDbCheckStatus({
+          loading: false,
+          ok: false,
+          message: db?.error || 'Server online namun belum tersambung ke Supabase.',
+        });
+      }
+    } catch (err: any) {
+      setDbCheckStatus({
+        loading: false,
+        ok: false,
+        message: err?.raw?.database?.error || err?.message || 'Tidak dapat menghubungi endpoint API server.',
+      });
     }
   };
 
@@ -204,12 +238,31 @@ export const ProfileAboutPage: React.FC<ProfileAboutPageProps> = ({ onReplaySpla
               </button>
               <button
                 type="button"
+                className="btn btn--outline btn--sm"
+                onClick={handleCheckDatabaseConnection}
+                disabled={dbCheckStatus.loading}
+              >
+                <Database size={14} />{' '}
+                {dbCheckStatus.loading ? 'Mengecek…' : 'Cek Koneksi Supabase'}
+              </button>
+              <button
+                type="button"
                 className="btn btn--danger-ghost btn--sm"
                 onClick={handleClearCache}
               >
                 <RefreshCw size={14} /> Reset Cache Lokal
               </button>
             </div>
+            {dbCheckStatus.message && (
+              <div
+                className={`toast ${
+                  dbCheckStatus.ok ? 'toast--success' : 'toast--error'
+                }`}
+                style={{ marginTop: '12px', marginBottom: 0 }}
+              >
+                <span>{dbCheckStatus.message}</span>
+              </div>
+            )}
           </div>
         </div>
       )}

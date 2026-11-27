@@ -1,5 +1,5 @@
 import express from 'express';
-import { ClaimController } from '../controllers/claimController';
+import { ClaimController } from '../controllers/claimController.js';
 
 const router = express.Router();
 

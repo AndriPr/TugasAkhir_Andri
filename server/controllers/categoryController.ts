@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CategoryModel } from '../models/categoryModel';
+import { CategoryModel } from '../models/categoryModel.js';
 
 export const CategoryController = {
   async getAll(req: Request, res: Response) {
@@ -13,7 +13,7 @@ export const CategoryController = {
 
   async getById(req: Request, res: Response) {
     try {
-      const { id } = req.params;
+      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       const category = await CategoryModel.getById(id);
       if (!category) {
         return res.status(404).json({ success: false, message: 'Kategori tidak ditemukan' });
@@ -39,7 +39,7 @@ export const CategoryController = {
 
   async update(req: Request, res: Response) {
     try {
-      const { id } = req.params;
+      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       const updated = await CategoryModel.update(id, req.body);
       if (!updated) {
         return res.status(404).json({ success: false, message: 'Kategori tidak ditemukan' });
@@ -52,7 +52,7 @@ export const CategoryController = {
 
   async remove(req: Request, res: Response) {
     try {
-      const { id } = req.params;
+      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       const success = await CategoryModel.remove(id);
       if (!success) {
         return res.status(404).json({ success: false, message: 'Kategori tidak ditemukan' });

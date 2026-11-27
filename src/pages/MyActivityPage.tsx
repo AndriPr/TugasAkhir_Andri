@@ -18,6 +18,7 @@ import { getUserProfile } from '../services/userService';
 import { formatDate, getStatusBadge } from '../utils/helpers';
 import { ConfirmModal } from '../components/common/ConfirmModal';
 import { AnimatedCounter } from '../components/common/MotionPrimitives';
+import { getLastSyncError } from '../utils/syncQueue';
 
 interface MyActivityPageProps {
   onSelectItem: (item: LostFindItem) => void;
@@ -43,6 +44,7 @@ export const MyActivityPage: React.FC<MyActivityPageProps> = ({
   const userProfile = getUserProfile();
   const [subTab, setSubTab] = useState<'reports' | 'claims'>('reports');
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const lastSyncError = pendingSyncCount > 0 ? getLastSyncError() : '';
 
   const { items: myItems, loading: itemsLoading, refetch: refetchItems } = useItems({
     userId: userProfile.userId,
@@ -107,7 +109,9 @@ export const MyActivityPage: React.FC<MyActivityPageProps> = ({
               <p>
                 {isOffline
                   ? 'Akan otomatis diunggah ke Supabase agar terlihat di device lain saat internet aktif kembali.'
-                  : 'Koneksi aktif! Klik tombol di samping untuk langsung mengirim data ke database Supabase.'}
+                  : lastSyncError
+                    ? `Gagal sync terakhir: ${lastSyncError}`
+                    : 'Koneksi aktif! Klik tombol di samping untuk langsung mengirim data ke database Supabase.'}
               </p>
             </div>
           </div>

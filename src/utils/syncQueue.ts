@@ -24,7 +24,25 @@ export interface SyncResult {
   syncedCount: number;
   failedCount: number;
   remainingCount: number;
+  lastError?: string;
 }
+
+const LAST_SYNC_ERROR_KEY = 'lostfind_last_sync_error';
+
+export const getLastSyncError = (): string => {
+  try {
+    return localStorage.getItem(LAST_SYNC_ERROR_KEY) || '';
+  } catch {
+    return '';
+  }
+};
+
+const setLastSyncError = (msg: string): void => {
+  try {
+    if (msg) localStorage.setItem(LAST_SYNC_ERROR_KEY, msg);
+    else localStorage.removeItem(LAST_SYNC_ERROR_KEY);
+  } catch {}
+};
 
 let isSyncRunning = false;
 
@@ -158,6 +176,7 @@ export const processSyncQueue = async (): Promise<SyncResult> => {
   isSyncRunning = true;
   let syncedCount = 0;
   let failedCount = 0;
+  let lastError = '';
   const remaining: SyncOperation[] = [];
 
   try {
@@ -186,8 +205,9 @@ export const processSyncQueue = async (): Promise<SyncResult> => {
           syncedCount++;
           continue;
         }
-        // Network error or server down -> stop and keep remaining ops in order
+        // Network error or server/database error -> stop and keep remaining ops in order
         failedCount++;
+        lastError = err?.message || 'Gagal menghubungi server API.';
         remaining.push(op, ...initialQueue.slice(i + 1));
         break;
       }
@@ -199,11 +219,13 @@ export const processSyncQueue = async (): Promise<SyncResult> => {
     const newlyAdded = latestQueue.filter((q) => !processedIds.has(q.id));
     const finalQueue = [...remaining, ...newlyAdded];
 
+    setLastSyncError(failedCount > 0 ? lastError : '');
     saveSyncQueue(finalQueue);
     const result: SyncResult = {
       syncedCount,
       failedCount,
       remainingCount: finalQueue.length,
+      ...(lastError ? { lastError } : {}),
     };
     emitSyncEvent(result);
     return result;

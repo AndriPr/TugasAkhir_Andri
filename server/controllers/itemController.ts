@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ItemModel, ItemFilterParams } from '../models/itemModel';
+import { ItemModel, ItemFilterParams } from '../models/itemModel.js';
 
 export const ItemController = {
   async getAll(req: Request, res: Response) {
@@ -30,7 +30,7 @@ export const ItemController = {
 
   async getById(req: Request, res: Response) {
     try {
-      const { id } = req.params;
+      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       const item = await ItemModel.getById(id);
       if (!item) {
         return res.status(404).json({ success: false, message: 'Laporan barang tidak ditemukan' });
@@ -54,26 +54,28 @@ export const ItemController = {
       const created = await ItemModel.create(req.body);
       res.status(201).json({ success: true, data: created, message: 'Laporan berhasil dibuat' });
     } catch (err: any) {
-      res.status(400).json({ success: false, error: err.message });
+      const statusCode = err.message?.includes('terkonfigurasi') ? 503 : 500;
+      res.status(statusCode).json({ success: false, message: err.message, error: err.message });
     }
   },
 
   async update(req: Request, res: Response) {
     try {
-      const { id } = req.params;
+      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       const updated = await ItemModel.update(id, req.body);
       if (!updated) {
         return res.status(404).json({ success: false, message: 'Laporan barang tidak ditemukan' });
       }
       res.json({ success: true, data: updated, message: 'Laporan berhasil diperbarui' });
     } catch (err: any) {
-      res.status(400).json({ success: false, error: err.message });
+      const statusCode = err.message?.includes('terkonfigurasi') ? 503 : 500;
+      res.status(statusCode).json({ success: false, message: err.message, error: err.message });
     }
   },
 
   async remove(req: Request, res: Response) {
     try {
-      const { id } = req.params;
+      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       const success = await ItemModel.remove(id);
       if (!success) {
         return res.status(404).json({ success: false, message: 'Laporan barang tidak ditemukan' });

@@ -29,9 +29,10 @@ import {
 import { itemService } from '../services/itemService';
 import { getUserProfile } from '../services/userService';
 import { ConfirmModal } from '../components/common/ConfirmModal';
+import { compressImageFile } from '../utils/helpers';
 
 interface ReportPageProps {
-  onSuccess: (newItem: LostFindItem) => void;
+  onSuccess: (newItem: LostFindItem, synced?: boolean) => void;
   onCancel: () => void;
 }
 
@@ -153,22 +154,22 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
     setDraftTimestamp(null);
   };
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 4 * 1024 * 1024) {
-      setErrorMessage('Ukuran file foto maksimal 4MB.');
+    if (file.size > 10 * 1024 * 1024) {
+      setErrorMessage('Ukuran file foto maksimal 10MB.');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      setImageUrl(base64);
+    try {
+      const optimizedDataUrl = await compressImageFile(file);
+      setImageUrl(optimizedDataUrl);
       setErrorMessage('');
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      setErrorMessage('Gagal memproses gambar yang dipilih.');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -219,7 +220,7 @@ export const ReportPage: React.FC<ReportPageProps> = ({ onSuccess, onCancel }) =
       const res = await itemService.createItem(payload);
       if (res.success && res.data) {
         deleteDraft('report');
-        onSuccess(res.data);
+        onSuccess(res.data, res.synced);
       } else {
         throw new Error('Gagal menyimpan laporan.');
       }

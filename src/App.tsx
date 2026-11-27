@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { ActiveTab, LostFindItem, ItemClaim } from './types';
 import { Header } from './components/common/Header';
 import { BottomNav } from './components/common/BottomNav';
@@ -30,7 +30,18 @@ export function App() {
     getPendingSyncCount()
   );
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const [syncNotice, setSyncNotice] = useState<string>('');
+  const [syncNotice, setSyncNotice] = useState<{
+    text: string;
+    variant: 'success' | 'warning';
+  } | null>(null);
+
+  const showToastNotice = useCallback(
+    (text: string, variant: 'success' | 'warning' = 'success') => {
+      setSyncNotice({ text, variant });
+      setTimeout(() => setSyncNotice(null), 5000);
+    },
+    []
+  );
 
   const refreshUserCounts = useCallback(async () => {
     try {
@@ -49,17 +60,19 @@ export function App() {
       const res = await processSyncQueue();
       setPendingSyncCount(res.remainingCount);
       if (res.syncedCount > 0) {
-        setSyncNotice(
-          `${res.syncedCount} data offline berhasil di-upload ke database!`
+        showToastNotice(
+          `${res.syncedCount} data offline berhasil di-upload ke database Supabase!`,
+          'success'
         );
         window.dispatchEvent(new CustomEvent('lostfind-data-synced'));
         refreshUserCounts();
-        setTimeout(() => setSyncNotice(''), 4500);
+      } else if (res.failedCount > 0 && res.lastError) {
+        showToastNotice(`Upload tertunda: ${res.lastError}`, 'warning');
       }
     } finally {
       setIsSyncing(false);
     }
-  }, [refreshUserCounts]);
+  }, [refreshUserCounts, showToastNotice]);
 
   // Monitor network online/offline state & auto-sync when back online
   useEffect(() => {
@@ -99,11 +112,19 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleItemCreated = (newItem: LostFindItem) => {
+  const handleItemCreated = (newItem: LostFindItem, synced?: boolean) => {
     refreshUserCounts();
     setPendingSyncCount(getPendingSyncCount());
     setSelectedItem(newItem);
     setActiveTab(newItem.type === 'lost' ? 'lost' : 'found');
+    if (synced) {
+      showToastNotice('Laporan berhasil diterbitkan ke database Supabase!', 'success');
+    } else {
+      showToastNotice(
+        'Server tidak terjangkau / offline. Disimpan ke antrean lokal untuk sinkronisasi otomatis.',
+        'warning'
+      );
+    }
   };
 
   const handleItemUpdated = async (updatedItem: LostFindItem) => {
@@ -147,9 +168,18 @@ export function App() {
       />
 
       {syncNotice && (
-        <div className="sync-floating-toast" role="status">
-          <CheckCircle2 size={18} />
-          <span>{syncNotice}</span>
+        <div
+          className={`sync-floating-toast ${
+            syncNotice.variant === 'warning' ? 'sync-floating-toast--warning' : ''
+          }`}
+          role="status"
+        >
+          {syncNotice.variant === 'warning' ? (
+            <AlertCircle size={18} />
+          ) : (
+            <CheckCircle2 size={18} />
+          )}
+          <span>{syncNotice.text}</span>
         </div>
       )}
 

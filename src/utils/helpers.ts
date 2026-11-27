@@ -91,3 +91,50 @@ export const truncate = (str: string, maxLength: number = 80): string => {
   if (!str || str.length <= maxLength) return str || '';
   return str.slice(0, maxLength).trimEnd() + '…';
 };
+
+/**
+ * Compresses an uploaded image File into a compact JPEG Data URL so it stays
+ * well within Vercel serverless payload limits (4.5MB) and localStorage quota.
+ */
+export const compressImageFile = (
+  file: File,
+  maxDimension: number = 1024,
+  quality: number = 0.78
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Gagal membaca file gambar.'));
+    reader.onload = () => {
+      const rawDataUrl = reader.result as string;
+      if (file.type === 'image/svg+xml' || file.size <= 180 * 1024) {
+        resolve(rawDataUrl);
+        return;
+      }
+
+      const img = new Image();
+      img.onerror = () => resolve(rawDataUrl);
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDimension || height > maxDimension) {
+          const ratio = Math.min(maxDimension / width, maxDimension / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(rawDataUrl);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressed.length < rawDataUrl.length ? compressed : rawDataUrl);
+      };
+      img.src = rawDataUrl;
+    };
+    reader.readAsDataURL(file);
+  });
+};
