@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { CheckCircle2 } from 'lucide-react';
 import { ActiveTab, LostFindItem, ItemClaim } from './types';
 import { Header } from './components/common/Header';
 import { BottomNav } from './components/common/BottomNav';
@@ -15,6 +16,7 @@ import { ProfileAboutPage } from './pages/ProfileAboutPage';
 import { itemService } from './services/itemService';
 import { claimService } from './services/claimService';
 import { getUserProfile } from './services/userService';
+import { getPendingSyncCount, processSyncQueue } from './utils/syncQueue';
 import './App.css';
 
 export function App() {
@@ -24,19 +26,11 @@ export function App() {
   const [selectedClaim, setSelectedClaim] = useState<ItemClaim | null>(null);
   const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
   const [myCount, setMyCount] = useState<number>(0);
-
-  useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
+  const [pendingSyncCount, setPendingSyncCount] = useState<number>(() =>
+    getPendingSyncCount()
+  );
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [syncNotice, setSyncNotice] = useState<string>('');
 
   const refreshUserCounts = useCallback(async () => {
     try {
@@ -47,6 +41,52 @@ export function App() {
       }
     } catch {}
   }, []);
+
+  const handleSyncNow = useCallback(async () => {
+    if (!navigator.onLine || getPendingSyncCount() === 0) return;
+    try {
+      setIsSyncing(true);
+      const res = await processSyncQueue();
+      setPendingSyncCount(res.remainingCount);
+      if (res.syncedCount > 0) {
+        setSyncNotice(
+          `${res.syncedCount} data offline berhasil di-upload ke database!`
+        );
+        window.dispatchEvent(new CustomEvent('lostfind-data-synced'));
+        refreshUserCounts();
+        setTimeout(() => setSyncNotice(''), 4500);
+      }
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [refreshUserCounts]);
+
+  // Monitor network online/offline state & auto-sync when back online
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline(false);
+      handleSyncNow();
+    };
+    const handleOffline = () => setIsOffline(true);
+    const handleSyncUpdated = () => {
+      setPendingSyncCount(getPendingSyncCount());
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('lostfind-sync-updated', handleSyncUpdated);
+
+    // Attempt initial sync on load if online and queue has pending items
+    if (navigator.onLine && getPendingSyncCount() > 0) {
+      handleSyncNow();
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('lostfind-sync-updated', handleSyncUpdated);
+    };
+  }, [handleSyncNow]);
 
   useEffect(() => {
     refreshUserCounts();
@@ -61,19 +101,22 @@ export function App() {
 
   const handleItemCreated = (newItem: LostFindItem) => {
     refreshUserCounts();
+    setPendingSyncCount(getPendingSyncCount());
     setSelectedItem(newItem);
     setActiveTab(newItem.type === 'lost' ? 'lost' : 'found');
   };
 
   const handleItemUpdated = async (updatedItem: LostFindItem) => {
-    await itemService.updateItem(updatedItem.id, updatedItem);
-    setSelectedItem(updatedItem);
+    const res = await itemService.updateItem(updatedItem.id, updatedItem);
+    setSelectedItem(res.data || updatedItem);
+    setPendingSyncCount(getPendingSyncCount());
     refreshUserCounts();
   };
 
   const handleDeleteItem = async (itemId: string) => {
     await itemService.deleteItem(itemId);
     setSelectedItem(null);
+    setPendingSyncCount(getPendingSyncCount());
     refreshUserCounts();
   };
 
@@ -84,6 +127,7 @@ export function App() {
     const res = await claimService.updateClaimStatus(claimId, status);
     if (res.success && res.data) {
       setSelectedClaim(res.data);
+      setPendingSyncCount(getPendingSyncCount());
     }
   };
 
@@ -97,7 +141,17 @@ export function App() {
         activeTab={activeTab}
         onTabChange={handleTabChange}
         isOffline={isOffline}
+        pendingSyncCount={pendingSyncCount}
+        isSyncing={isSyncing}
+        onSyncNow={handleSyncNow}
       />
+
+      {syncNotice && (
+        <div className="sync-floating-toast" role="status">
+          <CheckCircle2 size={18} />
+          <span>{syncNotice}</span>
+        </div>
+      )}
 
       <main className="app-main" key={activeTab}>
         {activeTab === 'lost' && (
@@ -127,6 +181,10 @@ export function App() {
             onSelectClaim={(claim) => setSelectedClaim(claim)}
             onNavigateReport={() => handleTabChange('report')}
             onDeleteItem={handleDeleteItem}
+            pendingSyncCount={pendingSyncCount}
+            isSyncing={isSyncing}
+            isOffline={isOffline}
+            onSyncNow={handleSyncNow}
           />
         )}
 
@@ -143,6 +201,7 @@ export function App() {
         onItemUpdated={handleItemUpdated}
         onDeleteItem={handleDeleteItem}
         onClaimSubmitted={() => {
+          setPendingSyncCount(getPendingSyncCount());
           refreshUserCounts();
         }}
       />

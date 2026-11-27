@@ -40,6 +40,14 @@ export function useItems(params: {
     fetchItems();
   }, [fetchItems]);
 
+  useEffect(() => {
+    const handleSynced = () => {
+      fetchItems();
+    };
+    window.addEventListener('lostfind-data-synced', handleSynced);
+    return () => window.removeEventListener('lostfind-data-synced', handleSynced);
+  }, [fetchItems]);
+
   return {
     items,
     loading,

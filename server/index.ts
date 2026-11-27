@@ -41,8 +41,8 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/claims', claimRoutes);
 
-// Start server if not running in serverless environment
-if (process.env.NODE_ENV !== 'test') {
+// Start server if not running in Vercel serverless or test environment
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
   app.listen(port, () => {
     console.log(`====================================================`);
     console.log(`🚀 LostFind API Web Service berjalan pada port: ${port}`);

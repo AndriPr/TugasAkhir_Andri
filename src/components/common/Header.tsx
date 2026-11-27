@@ -1,11 +1,14 @@
 import React from 'react';
-import { Plus, Wifi, WifiOff, Compass } from 'lucide-react';
+import { Plus, Wifi, WifiOff, Compass, CloudUpload } from 'lucide-react';
 import { ActiveTab } from '../../types';
 
 interface HeaderProps {
   activeTab: ActiveTab;
   onTabChange: (tab: ActiveTab) => void;
   isOffline: boolean;
+  pendingSyncCount?: number;
+  isSyncing?: boolean;
+  onSyncNow?: () => void;
 }
 
 const DESKTOP_TABS: { id: ActiveTab; label: string }[] = [
@@ -19,11 +22,14 @@ export const Header: React.FC<HeaderProps> = ({
   activeTab,
   onTabChange,
   isOffline,
+  pendingSyncCount = 0,
+  isSyncing = false,
+  onSyncNow,
 }) => {
   return (
     <header className="app-header">
       <div className="header-container">
-        {/* Left Brand (Tripco Cyan Wordmark Style) */}
+        {/* Left Brand */}
         <div
           className="header-brand"
           onClick={() => onTabChange('lost')}
@@ -55,8 +61,25 @@ export const Header: React.FC<HeaderProps> = ({
           ))}
         </nav>
 
-        {/* Right Actions: Online Pill + Primary CTA Pill */}
+        {/* Right Actions: Pending Sync + Online Pill + Primary CTA Pill */}
         <div className="header-actions">
+          {pendingSyncCount > 0 && onSyncNow && (
+            <button
+              type="button"
+              className="sync-pill-btn"
+              onClick={onSyncNow}
+              disabled={isOffline || isSyncing}
+              title={
+                isOffline
+                  ? `${pendingSyncCount} data menunggu koneksi untuk upload ke database`
+                  : `Upload ${pendingSyncCount} data offline ke database sekarang`
+              }
+            >
+              <CloudUpload size={14} className={isSyncing ? 'spin' : ''} />
+              <span>{isSyncing ? 'Sync…' : `Sync (${pendingSyncCount})`}</span>
+            </button>
+          )}
+
           <div
             className={`status-pill ${
               isOffline ? 'status-pill--offline' : 'status-pill--online'

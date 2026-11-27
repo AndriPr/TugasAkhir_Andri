@@ -28,6 +28,7 @@ export interface LostFindItem {
   createdAt: string;
   updatedAt?: string;
   userId: string;
+  pendingSync?: boolean;
 }
 
 export type ClaimStatus = 'pending' | 'verified' | 'rejected' | 'completed';
@@ -46,6 +47,7 @@ export interface ItemClaim {
   submittedAt: string;
   verificationNotes?: string;
   userId: string;
+  pendingSync?: boolean;
 }
 
 export interface CategoryInfo {

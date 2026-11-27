@@ -3116,3 +3116,130 @@
 }
 
 .spin { animation: spin 1s linear infinite; }
+
+/* ==========================================================================
+   Offline Sync Queue UI (Sync Pill, Pending Tag, Banner & Toast)
+   ========================================================================== */
+.sync-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #b45309;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  animation: popScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sync-pill-btn:hover:not(:disabled) {
+  background: #fef3c7;
+  transform: translateY(-1px);
+}
+
+.sync-pill-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.trip-card__left-floats {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.trip-card__left-floats .trip-card__cat-float {
+  position: static;
+}
+
+.pending-sync-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(254, 243, 199, 0.96);
+  color: #b45309;
+  border: 1px solid #fde68a;
+  font-size: 0.68rem;
+  font-weight: 700;
+  backdrop-filter: blur(6px);
+}
+
+.pending-sync-tag--inline {
+  position: static;
+}
+
+.sync-banner {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fde68a;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  animation: slideUp 0.28s ease-out;
+}
+
+.sync-banner__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.sync-banner__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #d97706;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.14);
+}
+
+.sync-banner__left strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #92400e;
+}
+
+.sync-banner__left p {
+  font-size: 0.78rem;
+  color: #b45309;
+  margin-top: 2px;
+}
+
+.sync-floating-toast {
+  position: fixed;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #059669;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 12px 28px rgba(5, 150, 105, 0.35);
+  animation: slideUp 0.28s ease-out;
+}

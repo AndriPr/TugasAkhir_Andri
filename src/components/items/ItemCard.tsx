@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Calendar, MessageCircle, ArrowUpRight } from 'lucide-react';
+import { MapPin, Calendar, MessageCircle, ArrowUpRight, CloudOff } from 'lucide-react';
 import { LostFindItem } from '../../types';
 import {
   formatDate,
@@ -55,16 +55,27 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         />
         <div className="trip-card__shimmer" aria-hidden="true" />
 
-        {/* Top-Left Category Pill */}
-        <span
-          className="trip-card__cat-float"
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.92)',
-            color: catColor.text,
-          }}
-        >
-          {item.category}
-        </span>
+        {/* Top-Left Category Pill + Pending Sync Pill */}
+        <div className="trip-card__left-floats">
+          <span
+            className="trip-card__cat-float"
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.92)',
+              color: catColor.text,
+            }}
+          >
+            {item.category}
+          </span>
+          {item.pendingSync && (
+            <span
+              className="pending-sync-tag"
+              title="Tersimpan di browser lokal, akan otomatis di-upload ke database saat online"
+            >
+              <CloudOff size={11} />
+              <span>Menunggu Sync</span>
+            </span>
+          )}
+        </div>
 
         {/* Top-Right Status / Type Floating Badge (like Tripco rating pill) */}
         <span

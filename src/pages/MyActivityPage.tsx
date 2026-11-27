@@ -8,6 +8,8 @@ import {
   ShieldCheck,
   RefreshCw,
   Sparkles,
+  CloudUpload,
+  CloudOff,
 } from 'lucide-react';
 import { LostFindItem, ItemClaim } from '../types';
 import { useItems } from '../hooks/useItems';
@@ -22,6 +24,10 @@ interface MyActivityPageProps {
   onSelectClaim: (claim: ItemClaim) => void;
   onNavigateReport: () => void;
   onDeleteItem: (itemId: string) => void;
+  pendingSyncCount?: number;
+  isSyncing?: boolean;
+  isOffline?: boolean;
+  onSyncNow?: () => void;
 }
 
 export const MyActivityPage: React.FC<MyActivityPageProps> = ({
@@ -29,6 +35,10 @@ export const MyActivityPage: React.FC<MyActivityPageProps> = ({
   onSelectClaim,
   onNavigateReport,
   onDeleteItem,
+  pendingSyncCount = 0,
+  isSyncing = false,
+  isOffline = false,
+  onSyncNow,
 }) => {
   const userProfile = getUserProfile();
   const [subTab, setSubTab] = useState<'reports' | 'claims'>('reports');
@@ -82,6 +92,37 @@ export const MyActivityPage: React.FC<MyActivityPageProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Offline Sync Banner when there are pending items in localStorage */}
+      {pendingSyncCount > 0 && (
+        <div className="sync-banner">
+          <div className="sync-banner__left">
+            <div className="sync-banner__icon">
+              <CloudUpload size={20} className={isSyncing ? 'spin' : ''} />
+            </div>
+            <div>
+              <strong>
+                {pendingSyncCount} perubahan offline menunggu di-upload ke database
+              </strong>
+              <p>
+                {isOffline
+                  ? 'Akan otomatis diunggah ke Supabase agar terlihat di device lain saat internet aktif kembali.'
+                  : 'Koneksi aktif! Klik tombol di samping untuk langsung mengirim data ke database Supabase.'}
+              </p>
+            </div>
+          </div>
+          {onSyncNow && (
+            <button
+              type="button"
+              className="btn btn--cyan-pill btn--sm"
+              onClick={onSyncNow}
+              disabled={isOffline || isSyncing}
+            >
+              {isSyncing ? 'Mengunggah…' : 'Upload ke Database'}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Tripco Dark-Pill Sub Tabs */}
       <div className="explore-pills-row">
@@ -167,6 +208,11 @@ export const MyActivityPage: React.FC<MyActivityPageProps> = ({
                           >
                             {statusBadge.label}
                           </span>
+                          {item.pendingSync && (
+                            <span className="pending-sync-tag pending-sync-tag--inline">
+                              <CloudOff size={11} /> Menunggu Sync
+                            </span>
+                          )}
                         </div>
                         <h4 className="activity-item-title">{item.title}</h4>
                         <span className="activity-item-meta">
@@ -244,6 +290,11 @@ export const MyActivityPage: React.FC<MyActivityPageProps> = ({
                           >
                             {statusBadge.label}
                           </span>
+                          {claim.pendingSync && (
+                            <span className="pending-sync-tag pending-sync-tag--inline">
+                              <CloudOff size={11} /> Menunggu Sync
+                            </span>
+                          )}
                           <span className="meta-date">
                             Diajukan: {formatDate(claim.submittedAt)}
                           </span>

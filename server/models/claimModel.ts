@@ -10,9 +10,10 @@ export const ClaimModel = {
       let query = supabase.from('claims').select('*').order('submittedAt', { ascending: false });
       if (userId) query = query.eq('userId', userId);
       const { data, error } = await query;
-      if (!error && data && data.length > 0) {
+      if (!error && data) {
         return data as DbClaim[];
       }
+      if (error) console.warn('[ClaimModel.getAll] Supabase fallback:', error.message);
     }
 
     if (userId) {
@@ -66,19 +67,23 @@ export const ClaimModel = {
   },
 
   async update(id: string, payload: Partial<DbClaim>): Promise<DbClaim | null> {
+    const { pendingSync: _ps, ...cleanPayload } = payload as Partial<DbClaim> & {
+      pendingSync?: boolean;
+    };
     if (isSupabaseConfigured && supabase) {
       const { data, error } = await supabase
         .from('claims')
-        .update(payload)
+        .update(cleanPayload)
         .eq('id', id)
         .select()
         .single();
       if (!error && data) return data as DbClaim;
+      if (error) console.warn('[ClaimModel.update] Supabase fallback:', error.message);
     }
 
     const index = memoryClaims.findIndex((c) => c.id === id);
     if (index === -1) return null;
-    memoryClaims[index] = { ...memoryClaims[index], ...payload };
+    memoryClaims[index] = { ...memoryClaims[index], ...cleanPayload };
     return memoryClaims[index];
   },
 

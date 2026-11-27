@@ -22,9 +22,10 @@ export const ItemModel = {
       if (params.search) query = query.ilike('title', `%${params.search}%`);
 
       const { data, error } = await query;
-      if (!error && data && data.length > 0) {
+      if (!error && data) {
         return data as DbItem[];
       }
+      if (error) console.warn('[ItemModel.getAll] Supabase fallback:', error.message);
     }
 
     // Embedded store filtering
@@ -93,8 +94,9 @@ export const ItemModel = {
   },
 
   async update(id: string, payload: Partial<DbItem>): Promise<DbItem | null> {
+    const { pendingSync: _ps, ...rest } = payload as Partial<DbItem> & { pendingSync?: boolean };
     const updatePayload = {
-      ...payload,
+      ...rest,
       updatedAt: new Date().toISOString(),
     };
 
@@ -106,6 +108,7 @@ export const ItemModel = {
         .select()
         .single();
       if (!error && data) return data as DbItem;
+      if (error) console.warn('[ItemModel.update] Supabase fallback:', error.message);
     }
 
     const index = memoryItems.findIndex((item) => item.id === id);

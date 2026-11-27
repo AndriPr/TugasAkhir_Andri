@@ -31,6 +31,14 @@ export function useClaims(filterByUser: boolean = true) {
     fetchClaims();
   }, [fetchClaims]);
 
+  useEffect(() => {
+    const handleSynced = () => {
+      fetchClaims();
+    };
+    window.addEventListener('lostfind-data-synced', handleSynced);
+    return () => window.removeEventListener('lostfind-data-synced', handleSynced);
+  }, [fetchClaims]);
+
   return {
     claims,
     loading,

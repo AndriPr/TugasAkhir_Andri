@@ -7,7 +7,7 @@ export const CategoryModel = {
   async getAll(): Promise<DbCategory[]> {
     if (isSupabaseConfigured && supabase) {
       const { data, error } = await supabase.from('categories').select('*');
-      if (!error && data && data.length > 0) {
+      if (!error && data) {
         return data as DbCategory[];
       }
     }
