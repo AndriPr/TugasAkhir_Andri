@@ -44,7 +44,7 @@ const setLastSyncError = (msg: string): void => {
   } catch {}
 };
 
-let isSyncRunning = false;
+let activeSyncPromise: Promise<SyncResult> | null = null;
 
 const emitSyncEvent = (detail?: Partial<SyncResult>) => {
   if (typeof window !== 'undefined') {
@@ -164,72 +164,96 @@ const clearLocalPendingFlag = (kind: 'item' | 'claim', targetId: string) => {
  * Replays queued offline mutations to the REST API / Supabase database.
  */
 export const processSyncQueue = async (): Promise<SyncResult> => {
+  if (activeSyncPromise) {
+    return activeSyncPromise;
+  }
+
   const initialQueue = getSyncQueue();
-  if (isSyncRunning || initialQueue.length === 0) {
-    return { syncedCount: 0, failedCount: 0, remainingCount: initialQueue.length };
+  if (initialQueue.length === 0) {
+    return { syncedCount: 0, failedCount: 0, remainingCount: 0 };
   }
 
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
     return { syncedCount: 0, failedCount: 0, remainingCount: initialQueue.length };
   }
 
-  isSyncRunning = true;
-  let syncedCount = 0;
-  let failedCount = 0;
-  let lastError = '';
-  const remaining: SyncOperation[] = [];
+  activeSyncPromise = (async () => {
+    let syncedCount = 0;
+    let failedCount = 0;
+    let lastError = '';
+    const remaining: SyncOperation[] = [];
 
-  try {
-    for (let i = 0; i < initialQueue.length; i++) {
-      const op = initialQueue[i];
-      try {
-        if (op.action === 'CREATE_ITEM') {
-          await apiClient.post('/items', op.payload);
-          clearLocalPendingFlag('item', op.targetId);
-        } else if (op.action === 'UPDATE_ITEM') {
-          await apiClient.put(`/items/${op.targetId}`, op.payload);
-          clearLocalPendingFlag('item', op.targetId);
-        } else if (op.action === 'DELETE_ITEM') {
-          await apiClient.delete(`/items/${op.targetId}`);
-        } else if (op.action === 'CREATE_CLAIM') {
-          await apiClient.post('/claims', op.payload);
-          clearLocalPendingFlag('claim', op.targetId);
-        } else if (op.action === 'UPDATE_CLAIM') {
-          await apiClient.put(`/claims/${op.targetId}`, op.payload);
-          clearLocalPendingFlag('claim', op.targetId);
-        }
-        syncedCount++;
-      } catch (err: any) {
-        // 404 on delete or 409 conflict means already deleted/created remotely -> clear from queue
-        if (err?.status === 404 && op.action === 'DELETE_ITEM') {
+    try {
+      for (let i = 0; i < initialQueue.length; i++) {
+        const op = initialQueue[i];
+        try {
+          if (op.action === 'CREATE_ITEM') {
+            await apiClient.post('/items', op.payload);
+            clearLocalPendingFlag('item', op.targetId);
+          } else if (op.action === 'UPDATE_ITEM') {
+            await apiClient.put(`/items/${op.targetId}`, op.payload);
+            clearLocalPendingFlag('item', op.targetId);
+          } else if (op.action === 'DELETE_ITEM') {
+            await apiClient.delete(`/items/${op.targetId}`);
+          } else if (op.action === 'CREATE_CLAIM') {
+            await apiClient.post('/claims', op.payload);
+            clearLocalPendingFlag('claim', op.targetId);
+          } else if (op.action === 'UPDATE_CLAIM') {
+            await apiClient.put(`/claims/${op.targetId}`, op.payload);
+            clearLocalPendingFlag('claim', op.targetId);
+          }
           syncedCount++;
-          continue;
+        } catch (err: any) {
+          const errMsg = String(err?.message || err?.raw?.error || '');
+          const isDuplicateAlreadySaved =
+            (op.action === 'CREATE_ITEM' || op.action === 'CREATE_CLAIM') &&
+            (err?.status === 409 ||
+              errMsg.includes('duplicate key') ||
+              errMsg.includes('23505'));
+
+          if (isDuplicateAlreadySaved) {
+            clearLocalPendingFlag(
+              op.action === 'CREATE_ITEM' ? 'item' : 'claim',
+              op.targetId
+            );
+            syncedCount++;
+            continue;
+          }
+
+          // 404 on delete means already deleted remotely -> clear from queue
+          if (err?.status === 404 && op.action === 'DELETE_ITEM') {
+            syncedCount++;
+            continue;
+          }
+
+          // Network error or server/database error -> stop and keep remaining ops in order
+          failedCount++;
+          lastError = errMsg || 'Gagal menghubungi server API.';
+          remaining.push(op, ...initialQueue.slice(i + 1));
+          break;
         }
-        // Network error or server/database error -> stop and keep remaining ops in order
-        failedCount++;
-        lastError = err?.message || 'Gagal menghubungi server API.';
-        remaining.push(op, ...initialQueue.slice(i + 1));
-        break;
       }
+
+      // Re-read in case new items were enqueued while syncing
+      const latestQueue = getSyncQueue();
+      const processedIds = new Set(initialQueue.map((q) => q.id));
+      const newlyAdded = latestQueue.filter((q) => !processedIds.has(q.id));
+      const finalQueue = [...remaining, ...newlyAdded];
+
+      setLastSyncError(failedCount > 0 ? lastError : '');
+      saveSyncQueue(finalQueue);
+      const result: SyncResult = {
+        syncedCount,
+        failedCount,
+        remainingCount: finalQueue.length,
+        ...(lastError ? { lastError } : {}),
+      };
+      emitSyncEvent(result);
+      return result;
+    } finally {
+      activeSyncPromise = null;
     }
+  })();
 
-    // Re-read in case new items were enqueued while syncing
-    const latestQueue = getSyncQueue();
-    const processedIds = new Set(initialQueue.map((q) => q.id));
-    const newlyAdded = latestQueue.filter((q) => !processedIds.has(q.id));
-    const finalQueue = [...remaining, ...newlyAdded];
-
-    setLastSyncError(failedCount > 0 ? lastError : '');
-    saveSyncQueue(finalQueue);
-    const result: SyncResult = {
-      syncedCount,
-      failedCount,
-      remainingCount: finalQueue.length,
-      ...(lastError ? { lastError } : {}),
-    };
-    emitSyncEvent(result);
-    return result;
-  } finally {
-    isSyncRunning = false;
-  }
+  return activeSyncPromise;
 };

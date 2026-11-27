@@ -94,6 +94,15 @@ export const ClaimModel = {
         .select()
         .single();
       if (error) {
+        // Idempotent handling if the client retried an already-inserted claim id
+        if (error.code === '23505' || error.message?.includes('duplicate key')) {
+          const { data: existing } = await supabase
+            .from('claims')
+            .select('*')
+            .eq('id', newClaim.id)
+            .maybeSingle();
+          if (existing) return existing as DbClaim;
+        }
         console.error('[ClaimModel.create] Supabase error:', error.message);
         throw new Error(`Gagal menyimpan klaim ke Supabase: ${error.message}`);
       }

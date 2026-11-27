@@ -141,6 +141,15 @@ export const ItemModel = {
         .select()
         .single();
       if (error) {
+        // Idempotent handling if the client retried an already-inserted item id
+        if (error.code === '23505' || error.message?.includes('duplicate key')) {
+          const { data: existing } = await supabase
+            .from('items')
+            .select('*')
+            .eq('id', newItem.id)
+            .maybeSingle();
+          if (existing) return existing as DbItem;
+        }
         console.error('[ItemModel.create] Supabase error:', error.message);
         throw new Error(`Gagal menyimpan laporan ke Supabase: ${error.message}`);
       }

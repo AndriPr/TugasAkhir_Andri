@@ -10,7 +10,7 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 8000, // 8 detik timeout
+  timeout: 15000, // 15 detik timeout untuk jaringan lambat & serverless cold start
 });
 
 // Response interceptor — unwrap response and normalise errors
